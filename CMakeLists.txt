@@ -13,5 +13,3 @@ target_link_libraries(fps
         glfw
         ${GLFW_LIBRARIES}
 )
-
-✨
