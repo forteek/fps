@@ -7,6 +7,9 @@ include_directories(include)
 file(GLOB SOURCES
         src/*.c
         src/*.cpp
+        src/*.h
+        src/shader/*.cpp
+        src/shader/*.h
 )
 
 add_subdirectory(lib/glfw)
