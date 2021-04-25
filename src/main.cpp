@@ -33,6 +33,7 @@ GLFWwindow* initialize_program() {
     }
 
     glViewport(0, 0, 800, 600);
+    glClearColor(0.5, 1, 0.75, 1);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
@@ -43,7 +44,7 @@ GLFWwindow* initialize_program() {
 int main() {
     GLFWwindow* window = initialize_program();
 
-    Shader shader("../src/shader/lambert_v.glsl", "../src/shader/lambert_f.glsl");
+    Shader shader("../src/shader/constant_v.glsl", "../src/shader/constant_f.glsl");
     shader.use();
 
     while(!glfwWindowShouldClose(window)) {
@@ -66,12 +67,25 @@ void draw_scene(Shader shader) {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
+    glm::mat4 model = glm::mat4(1.0f);
 
     glUniformMatrix4fv(shader.uniform("projection"), 1, false, glm::value_ptr(projection));
     glUniformMatrix4fv(shader.uniform("view"), 1, false, glm::value_ptr(view));
-
-    glm::mat4 model = glm::mat4(1.0f);
     glUniformMatrix4fv(shader.uniform("model"), 1, false, glm::value_ptr(model));
+
+    float verts[]={
+            0, 10, 0, 1,
+            -10, -10, 0, 1,
+            10, -10, 0, 1
+    };
+    int vertexCount=3;
+
+    glEnableVertexAttribArray(shader.attribute("vertex"));
+    glVertexAttribPointer(shader.attribute("vertex"), 4, GL_FLOAT, false, 0, verts);
+
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
+    glDisableVertexAttribArray(shader.attribute("vertex"));
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod) {}
