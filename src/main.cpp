@@ -9,7 +9,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod);
-void draw_scene(Shader shader, unsigned int VAO);
+void draw_scene(Shader shader);
 
 GLFWwindow* initialize_program() {
     glfwInit();
@@ -98,7 +98,7 @@ int main() {
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        draw_scene(shader, VAO);
+        draw_scene(shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -111,7 +111,7 @@ int main() {
     exit(EXIT_SUCCESS);
 }
 
-void draw_scene(Shader shader, unsigned int VAO) {
+void draw_scene(Shader shader) {
     shader.use();
 
     glm::mat4 projection = glm::perspective(glm::radians(50.0f), 800.0f/600.0f, 0.1f, 100.0f);
@@ -123,11 +123,11 @@ void draw_scene(Shader shader, unsigned int VAO) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0, 1, 0));
 
-    glUniformMatrix4fv(shader.uniform("projection"), 1, false, glm::value_ptr(projection));
-    glUniformMatrix4fv(shader.uniform("view"), 1, false, glm::value_ptr(view));
-    glUniformMatrix4fv(shader.uniform("model"), 1, false, glm::value_ptr(model));
+    shader.setUniformMatrix("projection", projection);
+    shader.setUniformMatrix("view", view);
+    shader.setUniformMatrix("model", model);
 
-    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, nullptr);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod) {}

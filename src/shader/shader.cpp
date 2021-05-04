@@ -32,53 +32,60 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
     unsigned int vertexShader, fragmentShader;
 
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vShaderCode, NULL);
+    glShaderSource(vertexShader, 1, &vShaderCode, nullptr);
     glCompileShader(vertexShader);
-    checkCompileErrors(vertexShader, "VERTEX");
+    Shader::checkCompileErrors(vertexShader, "VERTEX");
 
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
+    glShaderSource(fragmentShader, 1, &fShaderCode, nullptr);
     glCompileShader(fragmentShader);
-    checkCompileErrors(fragmentShader, "FRAGMENT");
+    Shader::checkCompileErrors(fragmentShader, "FRAGMENT");
 
     ID = glCreateProgram();
     glAttachShader(ID, vertexShader);
     glAttachShader(ID, fragmentShader);
     glLinkProgram(ID);
-    checkCompileErrors(ID, "PROGRAM");
+    Shader::checkCompileErrors(ID, "PROGRAM");
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
 
-void Shader::use()
+void Shader::use() const
 {
     glUseProgram(ID);
 }
 
-void Shader::checkCompileErrors(unsigned int shader, string type)
+void Shader::checkCompileErrors(unsigned int shader, const string& type)
 {
     int success;
-    char infoLog[1024];
-    if (type != "PROGRAM") {
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            fprintf(stderr, "Shader compilation error - %s\n%s", type.c_str(), infoLog);
-        }
-    } else {
+    char log[1024];
+
+    if (type == "PROGRAM") {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            fprintf(stderr, "Program linking error compilation error - %s\n%s", type.c_str(), infoLog);
+            glGetProgramInfoLog(shader, 1024, nullptr, log);
+            fprintf(stderr, "Program linking error compilation error - %s\n%s", type.c_str(), log);
         }
+
+        return;
+    }
+
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 1024, nullptr, log);
+        fprintf(stderr, "Shader compilation error - %s\n%s", type.c_str(), log);
     }
 }
 
-GLint Shader::uniform(string name) {
+GLint Shader::uniform(const string& name) const {
     return glGetUniformLocation(ID, name.c_str());
 }
 
-GLint Shader::attribute(string name) {
+GLint Shader::attribute(const string& name) const {
     return glGetAttribLocation(ID, name.c_str());
+}
+
+void Shader::setUniformMatrix(const string& name, glm::mat4 value) const {
+    glUniformMatrix4fv(this->uniform(name), 1, false, glm::value_ptr(value));
 }
