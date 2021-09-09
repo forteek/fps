@@ -8,8 +8,11 @@ file(GLOB SOURCES
         src/*.c
         src/*.cpp
         src/*.h
+        src/util/*.h
         src/shader/*.cpp
         src/shader/*.h
+        src/camera/*.cpp
+        src/camera/*.h
 )
 
 add_subdirectory(lib/glfw)
