@@ -16,7 +16,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod);
 void mouse_callback(GLFWwindow* window, double x, double y);
-void draw_scene(Shader shader);
+void draw_scene(Shader shader, Shader lightShader, unsigned int chestVAO, unsigned int lampVAO);
 void remove_vector_value(int value, std::vector<int> &vec);
 void handle_keys();
 
@@ -86,6 +86,7 @@ int main() {
     GLFWwindow* window = initialize_program();
 
     Shader shader("../src/shader/simple_v.glsl", "../src/shader/simple_f.glsl");
+    Shader lightShader("../src/shader/simple_v.glsl", "../src/shader/simple_f.glsl");
 
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -98,7 +99,7 @@ int main() {
 
     int texWidth, texHeight, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* image = stbi_load("../src/chest.png", &texWidth, &texHeight, &nrChannels, 0);
+    unsigned char* image = stbi_load("../src/texture.png", &texWidth, &texHeight, &nrChannels, 0);
 
     if (image) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
@@ -108,65 +109,81 @@ int main() {
     }
     stbi_image_free(image);
 
-    float vertices[] = {
+    float cubeVertices[] = {
             // positions                 // tex coords
-            -1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front left bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 1.0f, // front left top
-             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front right bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 1.0f, // front left top
-             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front right bottom
-             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
+            -1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
 
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.0f, // back right bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.0f, // back right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right top
+            -1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
 
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front left bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left top
+            -1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,
 
-             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front right bottom
-             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right top
+             1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
 
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.0f, // front left top
-             1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right top
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left top
-             1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right top
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left top
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
+            -1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
 
-            -1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.0f, // front left bottom
-             1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right bottom
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-             1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right bottom
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right bottom
+            -1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,
     };
 
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
+    unsigned int VBO;
     glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glBindTexture(GL_TEXTURE_2D, texture);
-    glBindVertexArray(VAO);
+
+    unsigned int chestVAO;
+    glGenVertexArrays(1, &chestVAO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(chestVertices), chestVertices, GL_STATIC_DRAW);
+    glBindVertexArray(chestVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(shader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(shader.attribute("texCoord"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    unsigned int lampVAO;
+    glGenVertexArrays(1, &lampVAO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lampVertices), lampVertices, GL_STATIC_DRAW);
+    glBindVertexArray(lampVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(lightShader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(lightShader.attribute("texCoord"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -179,31 +196,47 @@ int main() {
         lastFrame = currentFrame;
 
         handle_keys();
-        draw_scene(shader);
+        draw_scene(shader, lightShader, chestVAO, lampVAO);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &chestVAO);
     glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
 
-void draw_scene(Shader shader) {
+void draw_scene(Shader shader, Shader lightShader, unsigned int chestVAO, unsigned int lampVAO) {
     shader.use();
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.get_view_matrix();
+
     glm::mat4 model = glm::mat4(1.0f);
 //    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
 
     shader.setUniformMatrix("projection", projection);
     shader.setUniformMatrix("view", view);
     shader.setUniformMatrix("model", model);
+    shader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
+    glBindVertexArray(chestVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    lightShader.use();
+
+    glm::mat4 model2 = glm::mat4(1.0f);
+    model2 = glm::translate(model2, glm::vec3(1.2f, 1.0f, 2.0f));
+
+    lightShader.setUniformMatrix("projection", projection);
+    lightShader.setUniformMatrix("view", view);
+    lightShader.setUniformMatrix("model", model2);
+    lightShader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    glBindVertexArray(lampVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 

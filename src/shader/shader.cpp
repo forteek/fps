@@ -89,3 +89,7 @@ GLint Shader::attribute(const string& name) const {
 void Shader::setUniformMatrix(const string& name, glm::mat4 value) const {
     glUniformMatrix4fv(this->uniform(name), 1, false, glm::value_ptr(value));
 }
+
+void Shader::setUniformVec3(const string& name, glm::vec3 value) const {
+    glUniform3fv(this->uniform(name), 1, glm::value_ptr(value));
+}
