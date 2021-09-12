@@ -85,151 +85,72 @@ GLFWwindow* initialize_program() {
 int main() {
     GLFWwindow* window = initialize_program();
 
-    Shader shader("../src/shader/simple_v.glsl", "../src/shader/simple_f.glsl");
-    Shader lightShader("../src/shader/simple_v.glsl", "../src/shader/simple_f.glsl");
+    Shader shader("../src/shader/lighted_v.glsl", "../src/shader/lighted_f.glsl");
+    Shader lightShader("../src/shader/lamp_v.glsl", "../src/shader/lamp_f.glsl");
 
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    float cubeVertices[] = {
+            -1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            -1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
 
-    int texWidth, texHeight, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* image = stbi_load("../src/texture.png", &texWidth, &texHeight, &nrChannels, 0);
+            -1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,
 
-    if (image) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        fprintf(stderr, "Failed to load texture.");
-    }
-    stbi_image_free(image);
+             1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
 
-    float chestVertices[] = {
-            // positions                 // tex coords
-            -1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front left bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 1.0f, // front left top
-             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front right bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 1.0f, // front left top
-             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front right bottom
-             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
+            -1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f, -1.0f, 1.0f,
+             1.0f,  1.0f, -1.0f, 1.0f,
 
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.0f, // back right bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.0f, // back right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right top
-
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
-            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front left bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left top
-
-             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front right bottom
-             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right top
-
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.0f, // front left top
-             1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right top
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left top
-             1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right top
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left top
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
-
-            -1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.0f, // front left bottom
-             1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right bottom
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-             1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right bottom
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
-             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right bottom
-    };
-
-    float lampVertices[] = {
-            // positions                 // tex coords
-            -1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front left bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front left top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front left top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
-             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 1.0f, // front right top
-
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 1.0f, // back right top
-
-            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
-            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left bottom
-            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
-            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left bottom
-            -1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 1.0f, // front left top
-
-             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back right top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
-             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back right top
-             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
-             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 1.0f, // front right top
-
-            -1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front left top
-             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
-            -1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left top
-             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
-            -1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left top
-             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 1.0f, // back right top
-
-            -1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front left bottom
-             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right bottom
-            -1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left bottom
-             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right bottom
-            -1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left bottom
-             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 1.0f, // back right bottom
+            -1.0f, -1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,
     };
 
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
-    unsigned int chestVAO;
-    glGenVertexArrays(1, &chestVAO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(chestVertices), chestVertices, GL_STATIC_DRAW);
-    glBindVertexArray(chestVAO);
+    unsigned int cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glVertexAttribPointer(shader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(shader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(shader.attribute("texCoord"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     unsigned int lampVAO;
     glGenVertexArrays(1, &lampVAO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(lampVertices), lampVertices, GL_STATIC_DRAW);
     glBindVertexArray(lampVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glVertexAttribPointer(lightShader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(lightShader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(lightShader.attribute("texCoord"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -241,24 +162,25 @@ int main() {
         lastFrame = currentFrame;
 
         handle_keys();
-        draw_scene(shader, lightShader, chestVAO, lampVAO);
+        draw_scene(shader, lightShader, cubeVAO, lampVAO);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &chestVAO);
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &lampVAO);
     glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
 
-void draw_scene(Shader shader, Shader lightShader, unsigned int chestVAO, unsigned int lampVAO) {
-    shader.use();
-
+void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigned int lampVAO) {
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.get_view_matrix();
+
+    shader.use();
 
     glm::mat4 model = glm::mat4(1.0f);
 //    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
@@ -267,19 +189,20 @@ void draw_scene(Shader shader, Shader lightShader, unsigned int chestVAO, unsign
     shader.setUniformMatrix("view", view);
     shader.setUniformMatrix("model", model);
     shader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
 
-    glBindVertexArray(chestVAO);
+    glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     lightShader.use();
 
-    glm::mat4 model2 = glm::mat4(1.0f);
-    model2 = glm::translate(model2, glm::vec3(1.2f, 1.0f, 2.0f));
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(1.2f, 1.0f, 2.0f));
+    model = glm::scale(model, glm::vec3(0.2f));
 
     lightShader.setUniformMatrix("projection", projection);
     lightShader.setUniformMatrix("view", view);
-    lightShader.setUniformMatrix("model", model2);
-    lightShader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightShader.setUniformMatrix("model", model);
 
     glBindVertexArray(lampVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
