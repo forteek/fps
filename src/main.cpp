@@ -109,49 +109,94 @@ int main() {
     }
     stbi_image_free(image);
 
-    float cubeVertices[] = {
+    float chestVertices[] = {
             // positions                 // tex coords
-            -1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front left bottom
+            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 1.0f, // front left top
+             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front right bottom
+            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 1.0f, // front left top
+             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front right bottom
+             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
 
-            -1.0f, -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
+             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.0f, // back right bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
+             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.0f, // back right bottom
+             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right top
 
-            -1.0f, -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
+            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front left bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left top
+            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front left bottom
+            -1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left top
 
-             1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
+             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back right bottom
+             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
+             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front right bottom
+             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
+             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, // front right bottom
+             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right top
 
-            -1.0f,  1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
+            -1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.0f, // front left top
+             1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right top
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left top
+             1.0f,  1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right top
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left top
+             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right top
 
-            -1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.0f, // front left bottom
+             1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right bottom
+            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
+             1.0f, -1.0f,  1.0f, 1.0f,   0.0f, 0.5f, // front right bottom
+            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.0f, // back left bottom
+             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right bottom
+    };
+
+    float lampVertices[] = {
+            // positions                 // tex coords
+            -1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front left bottom
+            -1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front left top
+             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
+            -1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front left top
+             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
+             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 1.0f, // front right top
+
+            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
+             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
+             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back right bottom
+             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 1.0f, // back right top
+
+            -1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back left bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
+            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left bottom
+            -1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back left top
+            -1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front left bottom
+            -1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 1.0f, // front left top
+
+             1.0f, -1.0f, -1.0f, 1.0f,   0.5f, 0.5f, // back right bottom
+             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back right top
+             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
+             1.0f,  1.0f, -1.0f, 1.0f,   0.5f, 1.0f, // back right top
+             1.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.5f, // front right bottom
+             1.0f,  1.0f,  1.0f, 1.0f,   1.0f, 1.0f, // front right top
+
+            -1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front left top
+             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
+            -1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left top
+             1.0f,  1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right top
+            -1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left top
+             1.0f,  1.0f, -1.0f, 1.0f,   1.0f, 1.0f, // back right top
+
+            -1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 0.5f, // front left bottom
+             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right bottom
+            -1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left bottom
+             1.0f, -1.0f,  1.0f, 1.0f,   0.5f, 1.0f, // front right bottom
+            -1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 0.5f, // back left bottom
+             1.0f, -1.0f, -1.0f, 1.0f,   1.0f, 1.0f, // back right bottom
     };
 
     unsigned int VBO;
