@@ -70,3 +70,8 @@ glm::mat4 Camera::get_view_matrix()
 
     return glm::lookAt(POSITION, POSITION + FRONT, UP);
 }
+
+glm::vec3 Camera::get_position()
+{
+    return POSITION;
+}

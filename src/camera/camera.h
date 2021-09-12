@@ -31,6 +31,7 @@ class Camera {
         void handle_mouse(double x, double y);
         float get_fov() const;
         glm::mat4 get_view_matrix();
+        glm::vec3 get_position();
 };
 
 

@@ -89,47 +89,47 @@ int main() {
     Shader lightShader("../src/shader/lamp_v.glsl", "../src/shader/lamp_f.glsl");
 
     float cubeVertices[] = {
-            -1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-            -1.0f, -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-            -1.0f, -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-             1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-            -1.0f,  1.0f,  1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f,  1.0f, 1.0f,
-            -1.0f,  1.0f, -1.0f, 1.0f,
-             1.0f,  1.0f, -1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-            -1.0f, -1.0f,  1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f, 1.0f,
-             1.0f, -1.0f, -1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
     unsigned int VBO;
@@ -142,14 +142,17 @@ int main() {
     glGenVertexArrays(1, &cubeVAO);
     glBindVertexArray(cubeVAO);
 
-    glVertexAttribPointer(shader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(shader.attribute("vertex"), 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(shader.attribute("normal"), 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     unsigned int lampVAO;
     glGenVertexArrays(1, &lampVAO);
     glBindVertexArray(lampVAO);
 
-    glVertexAttribPointer(lightShader.attribute("vertex"), 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(lightShader.attribute("vertex"), 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -179,17 +182,20 @@ int main() {
 void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigned int lampVAO) {
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.get_view_matrix();
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
     shader.use();
 
     glm::mat4 model = glm::mat4(1.0f);
-//    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
+    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
 
     shader.setUniformMatrix("projection", projection);
     shader.setUniformMatrix("view", view);
     shader.setUniformMatrix("model", model);
     shader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
     shader.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader.setUniformVec3("lightPos", lightPos);
+    shader.setUniformVec3("viewPos", camera.get_position());
 
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -197,7 +203,7 @@ void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigne
     lightShader.use();
 
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(1.2f, 1.0f, 2.0f));
+    model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
 
     lightShader.setUniformMatrix("projection", projection);
