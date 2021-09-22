@@ -193,10 +193,27 @@ void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigne
     shader.setUniformMatrix("projection", projection);
     shader.setUniformMatrix("view", view);
     shader.setUniformMatrix("model", model);
-    shader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
     shader.setUniformVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-    shader.setUniformVec3("lightPos", lightPos);
     shader.setUniformVec3("viewPos", camera.get_position());
+
+    shader.setUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader.setUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader.setUniformVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader.setUniformFloat("material.shininess", 32.0f);
+
+    shader.setUniformVec3("light.position", lightPos);
+    glm::vec3 lightColor;
+    lightColor.x = sin(glfwGetTime() * 2.0f);
+    lightColor.y = sin(glfwGetTime() * 0.7f);
+    lightColor.z = sin(glfwGetTime() * 1.3f);
+
+    glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
+    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+
+    shader.setUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader.setUniformVec3("light.ambient", ambientColor);
+    shader.setUniformVec3("light.diffuse", diffuseColor);
+    shader.setUniformVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
