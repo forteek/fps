@@ -32,6 +32,7 @@ class Camera {
         float get_fov() const;
         glm::mat4 get_view_matrix();
         glm::vec3 get_position();
+        glm::vec3 get_front();
 };
 
 

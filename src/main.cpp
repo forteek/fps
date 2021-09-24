@@ -216,7 +216,10 @@ void draw_scene(
     shader.setUniformInt("material.specular", 1);
     shader.setUniformFloat("material.shininess", 32.0f);
 
-    shader.setUniformVec3("light.position", lightPos);
+    shader.setUniformVec3("light.position",  camera.get_position());
+    shader.setUniformVec3("light.direction", camera.get_front());
+    shader.setUniformFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
+    shader.setUniformFloat("light.outerCutOff",   glm::cos(glm::radians(17.5f)));
     shader.setUniformVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
     shader.setUniformVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
     shader.setUniformVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
