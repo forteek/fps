@@ -28,6 +28,7 @@ class Shader
         void setUniformMatrix(const string& name, glm::mat4 value) const;
         void setUniformVec3(const string& name, glm::vec3 value) const;
         void setUniformFloat(const string& name, float value) const;
+        void setUniformInt(const string& name, int value) const;
 };
 
 #endif

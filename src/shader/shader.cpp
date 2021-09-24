@@ -97,3 +97,7 @@ void Shader::setUniformVec3(const string& name, glm::vec3 value) const {
 void Shader::setUniformFloat(const string& name, float value) const {
     glUniform1f(this->uniform(name), value);
 }
+
+void Shader::setUniformInt(const string& name, int value) const {
+    glUniform1i(this->uniform(name), value);
+}
