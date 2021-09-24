@@ -216,10 +216,13 @@ void draw_scene(
     shader.setUniformInt("material.specular", 1);
     shader.setUniformFloat("material.shininess", 32.0f);
 
-    shader.setUniformVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    shader.setUniformVec3("light.position", lightPos);
     shader.setUniformVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
     shader.setUniformVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
     shader.setUniformVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader.setUniformFloat("light.constant",  1.0f);
+    shader.setUniformFloat("light.linear",    0.09f);
+    shader.setUniformFloat("light.quadratic", 0.032f);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -229,18 +232,18 @@ void draw_scene(
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-//    lightShader.use();
-//
-//    model = glm::mat4(1.0f);
-//    model = glm::translate(model, lightPos);
-//    model = glm::scale(model, glm::vec3(0.2f));
-//
-//    lightShader.setUniformMatrix("projection", projection);
-//    lightShader.setUniformMatrix("view", view);
-//    lightShader.setUniformMatrix("model", model);
-//
-//    glBindVertexArray(lampVAO);
-//    glDrawArrays(GL_TRIANGLES, 0, 36);
+    lightShader.use();
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));
+
+    lightShader.setUniformMatrix("projection", projection);
+    lightShader.setUniformMatrix("view", view);
+    lightShader.setUniformMatrix("model", model);
+
+    glBindVertexArray(lampVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void handle_keys()
