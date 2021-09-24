@@ -16,7 +16,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod);
 void mouse_callback(GLFWwindow* window, double x, double y);
-void draw_scene(Shader shader, Shader lightShader, unsigned int chestVAO, unsigned int lampVAO, unsigned int diffuseMap, unsigned int specularMap);
+void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigned int lampVAO, unsigned int diffuseMap, unsigned int specularMap);
 void remove_vector_value(int value, std::vector<int> &vec);
 void handle_keys();
 unsigned int loadTexture(const char *path);

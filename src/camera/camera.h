@@ -35,5 +35,4 @@ class Camera {
         glm::vec3 get_front();
 };
 
-
 #endif
