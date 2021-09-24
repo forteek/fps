@@ -6,56 +6,58 @@ struct Material {
     float     shininess;
 };
 
-struct DirectionalLight {
+struct Light {
+    int type;
     vec3 direction;
 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-};
-struct PointLight {
-    vec3 position;
 
+    vec3 position;
     float constant;
     float linear;
     float quadratic;
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
 };
 
 out vec4 FragColor;
 
 uniform Material material;
-uniform DirLight directionalLight;
-uniform int pointLightsCount;
-uniform PointLight pointLights[pointLightsCount];
 uniform vec3 objectColor;
 uniform vec3 viewPos;
+
+uniform int lightsCount;
+uniform Light lights[2];
 
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
 
-vec3 calc_directional_light(DirectionalLight light, vec3 normal, vec3 viewDir);
-vec3 calc_point_light(PointLight light, vec3 normal, vec3 viewDir, vec3 fragPos);
+vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir);
+vec3 calc_point_light(Light light, vec3 normal, vec3 viewDir, vec3 fragPos);
 
 void main()
 {
     vec3 normalized = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    vec3 result = calc_directional_light(directionalLight, normalized, viewDir);
+    vec3 result = vec3(0.0);
 
-    for (int i = 0; i < pointLights.length(); i++) {
-        result += calc_point_light(pointLights[i], normalized, FragPos, viewDir);
+    for (int i = 0; i < lights.length(); i++) {
+        switch (lights[i].type) {
+            case 0:
+                result += calc_directional_light(lights[i], normalized, viewDir);
+                break;
+            case 1:
+                result += calc_point_light(lights[i], normalized, FragPos, viewDir);
+                break;
+        }
     }
 
     FragColor = vec4(result, 1.0);
 }
 
-vec3 calc_directional_light(DirectionalLight light, vec3 normal, vec3 viewDir)
+vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.direction);
 
@@ -71,7 +73,7 @@ vec3 calc_directional_light(DirectionalLight light, vec3 normal, vec3 viewDir)
     return (ambient + diffuse + specular);
 }
 
-vec3 calc_point_light(PointLight light, vec3 normal, vec3 viewDir, vec3 fragPos)
+vec3 calc_point_light(Light light, vec3 normal, vec3 viewDir, vec3 fragPos)
 {
     vec3 lightDir = normalize(light.position - fragPos);
 

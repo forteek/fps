@@ -2,8 +2,8 @@
 #define LIGHT_TYPE_H
 
 enum class LightType {
-    DIRECTIONAL,
-    POINT,
+    DIRECTIONAL = 0,
+    POINT = 1,
 };
 
 #endif

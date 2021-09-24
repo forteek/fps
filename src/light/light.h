@@ -15,6 +15,12 @@ class Light {
         glm::vec3 get_ambient();
         glm::vec3 get_diffuse();
         glm::vec3 get_specular();
+
+        virtual glm::vec3 get_direction() {return {};};
+        virtual glm::vec3 get_position() {return {};};
+        virtual float get_constant() {return {};};
+        virtual float get_linear() {return {};};
+        virtual float get_quadratic() {return {};};
 };
 
 #endif

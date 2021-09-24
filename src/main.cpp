@@ -12,14 +12,18 @@
 
 #include "shader/shader.h"
 #include "camera/camera.h"
+#include "light/light.h"
+#include "light/directional_light.h"
+#include "light/point_light.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod);
 void mouse_callback(GLFWwindow* window, double x, double y);
-void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigned int lampVAO, unsigned int diffuseMap, unsigned int specularMap);
+void draw_scene(Shader shader, Shader lightShader, unsigned int cubeVAO, unsigned int lampVAO, unsigned int diffuseMap, unsigned int specularMap, const std::vector<Light*>& lights);
 void remove_vector_value(int value, std::vector<int> &vec);
 void handle_keys();
 unsigned int loadTexture(const char *path);
+std::vector<Light *> generate_lights();
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -166,6 +170,8 @@ int main() {
     unsigned int diffuseMap = loadTexture("../src/container2.png");
     unsigned int specularMap = loadTexture("../src/container2_specular.png");
 
+    std::vector<Light*> lights = generate_lights();
+
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -174,7 +180,7 @@ int main() {
         lastFrame = currentFrame;
 
         handle_keys();
-        draw_scene(shader, lightShader, cubeVAO, lampVAO, diffuseMap, specularMap);
+        draw_scene(shader, lightShader, cubeVAO, lampVAO, diffuseMap, specularMap, lights);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -194,11 +200,11 @@ void draw_scene(
     unsigned int cubeVAO,
     unsigned int lampVAO,
     unsigned int diffuseMap,
-    unsigned int specularMap
+    unsigned int specularMap,
+    const std::vector<Light*>& lights
 ) {
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.get_view_matrix();
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
     shader.use();
 
@@ -215,6 +221,42 @@ void draw_scene(
     shader.setUniformInt("material.ambient", 0);
     shader.setUniformInt("material.specular", 1);
     shader.setUniformFloat("material.shininess", 32.0f);
+
+    int i = 0;
+    for (auto light : lights) {
+        shader.setUniformInt("lights[" + std::to_string(i) + "].type", static_cast<int>(light->get_type()));
+        shader.setUniformVec3("lights[" + std::to_string(i) + "].ambient", light->get_ambient());
+        shader.setUniformVec3("lights[" + std::to_string(i) + "].diffuse", light->get_diffuse());
+        shader.setUniformVec3("lights[" + std::to_string(i) + "].specular", light->get_specular());
+
+        switch (light->get_type()) {
+            case LightType::DIRECTIONAL:
+                shader.setUniformVec3("lights[" + std::to_string(i) + "].direction", light->get_direction());
+                break;
+            case LightType::POINT:
+                shader.setUniformVec3("lights[" + std::to_string(i) + "].position", light->get_position());
+                shader.setUniformFloat("lights[" + std::to_string(i) + "].constant", light->get_constant());
+                shader.setUniformFloat("lights[" + std::to_string(i) + "].linear", light->get_linear());
+                shader.setUniformFloat("lights[" + std::to_string(i) + "].quadratic", light->get_quadratic());
+
+                lightShader.use();
+
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, light->get_position());
+                model = glm::scale(model, glm::vec3(0.2f));
+
+                lightShader.setUniformMatrix("projection", projection);
+                lightShader.setUniformMatrix("view", view);
+                lightShader.setUniformMatrix("model", model);
+
+                glBindVertexArray(lampVAO);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+
+                shader.use();
+        }
+
+        i++;
+    }
 
     shader.setUniformVec3("light.position",  camera.get_position());
     shader.setUniformVec3("light.direction", camera.get_front());
@@ -233,19 +275,6 @@ void draw_scene(
     glBindTexture(GL_TEXTURE_2D, specularMap);
 
     glBindVertexArray(cubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    lightShader.use();
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f));
-
-    lightShader.setUniformMatrix("projection", projection);
-    lightShader.setUniformMatrix("view", view);
-    lightShader.setUniformMatrix("model", model);
-
-    glBindVertexArray(lampVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
@@ -319,4 +348,26 @@ unsigned int loadTexture(char const * path)
     }
 
     return textureID;
+}
+
+std::vector<Light*> generate_lights() {
+    std::vector<Light*> lights;
+
+    lights.push_back(new DirectionalLight(
+            glm::vec3(-0.2f, -1.0f, -0.3f),
+            glm::vec3(0.05f, 0.05f, 0.05f),
+            glm::vec3(0.4f, 0.4f, 0.4f),
+            glm::vec3(0.5f, 0.5f, 0.5f)
+    ));
+    lights.push_back(new PointLight(
+            glm::vec3(1.2f, 1.0f, 2.0f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.2f, 0.2f, 0.2f),
+            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
+    ));
+
+    return lights;
 }

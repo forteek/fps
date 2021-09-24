@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "light.h"
 
-class PointLight : Light {
+class PointLight : public Light {
     protected:
         glm::vec3 POSITION{};
         float CONSTANT, LINEAR, QUADRATIC;
@@ -20,10 +20,10 @@ class PointLight : Light {
             glm::vec3 diffuse,
             glm::vec3 specular
         );
-        glm::vec3 get_position();
-        float get_constant();
-        float get_linear();
-        float get_quadratic();
+        glm::vec3 get_position() override;
+        float get_constant() override;
+        float get_linear() override;
+        float get_quadratic() override;
 };
 
 #endif
