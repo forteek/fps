@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #define STB_IMAGE_IMPLEMENTATION
@@ -214,7 +213,6 @@ void draw_scene(
     shader.setUniformMatrix("projection", projection);
     shader.setUniformMatrix("view", view);
     shader.setUniformMatrix("model", model);
-    shader.setUniformVec3("objectColor", glm::vec3(1.0f, 1.0f, 1.0f));
     shader.setUniformVec3("viewPos", camera.get_position());
 
     shader.setUniformVec3("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
@@ -249,6 +247,8 @@ void draw_scene(
                 lightShader.setUniformMatrix("view", view);
                 lightShader.setUniformMatrix("model", model);
 
+                lightShader.setUniformVec3("color", light->get_specular());
+
                 glBindVertexArray(lampVAO);
                 glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -257,17 +257,6 @@ void draw_scene(
 
         i++;
     }
-
-    shader.setUniformVec3("light.position",  camera.get_position());
-    shader.setUniformVec3("light.direction", camera.get_front());
-    shader.setUniformFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
-    shader.setUniformFloat("light.outerCutOff",   glm::cos(glm::radians(17.5f)));
-    shader.setUniformVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    shader.setUniformVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-    shader.setUniformVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    shader.setUniformFloat("light.constant",  1.0f);
-    shader.setUniformFloat("light.linear",    0.09f);
-    shader.setUniformFloat("light.quadratic", 0.032f);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -315,39 +304,33 @@ void remove_vector_value(int value, std::vector<int> &vec)
 
 unsigned int loadTexture(char const * path)
 {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_set_flip_vertically_on_load(true);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    int textureWidth, textureHeight, channelCount;
+    unsigned char *image = stbi_load(path, &textureWidth, &textureHeight, &channelCount, 0);
 
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
+    if (!image) {
+        fprintf(stderr, "Failed to load texture.");
+        stbi_image_free(image);
+
+        return texture;
     }
 
-    return textureID;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(image);
+
+    return texture;
 }
 
 std::vector<Light*> generate_lights() {
@@ -364,9 +347,18 @@ std::vector<Light*> generate_lights() {
             1.0f,
             0.09f,
             0.032f,
-            glm::vec3(0.2f, 0.2f, 0.2f),
-            glm::vec3(0.5f, 0.5f, 0.5f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
+            glm::vec3(0.2f, 0.0f, 0.0f),
+            glm::vec3(0.5f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 0.0f, 0.0f)
+    ));
+    lights.push_back(new PointLight(
+            glm::vec3(-1.2f, -1.0f, -2.0f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.0f, 0.2f, 0.0f),
+            glm::vec3(0.0f, 0.5f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f)
     ));
 
     return lights;

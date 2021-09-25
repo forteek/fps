@@ -23,11 +23,10 @@ struct Light {
 out vec4 FragColor;
 
 uniform Material material;
-uniform vec3 objectColor;
 uniform vec3 viewPos;
 
 uniform int lightsCount;
-uniform Light lights[2];
+uniform Light lights[3];
 
 in vec3 Normal;
 in vec3 FragPos;
