@@ -5,19 +5,17 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(include)
 file(GLOB SOURCES
-
         src/*.c
         src/*.cpp
         src/*.h
-
         src/shader/*.cpp
         src/shader/*.h
-
         src/camera/*.cpp
         src/camera/*.h
-
         src/light/*.cpp
         src/light/*.h
+        src/model/*.cpp
+        src/model/*.h
 )
 
 add_subdirectory(lib/glfw)
