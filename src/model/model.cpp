@@ -1,4 +1,6 @@
 #include "model.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 
 Model::Model(const char *path)
 {
@@ -30,13 +32,15 @@ void Model::load_model(const string& path)
 
 void Model::process_node(aiNode *node, const aiScene *scene)
 {
-    for (unsigned int nodeMeshId : node->mMeshes) {
-        aiMesh* mesh = scene->mMeshes[nodeMeshId];
+    for (unsigned int i = 0; i < node->mNumMeshes; i++)
+    {
+        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         MESHES.push_back(process_mesh(mesh, scene));
     }
 
-    for (aiNode* childNode : node->mChildren) {
-        process_node(childNode, scene);
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        process_node(node->mChildren[i], scene);
     }
 }
 
@@ -103,11 +107,25 @@ vector<Texture> Model::load_material_textures(aiMaterial *material, aiTextureTyp
         aiString path;
         material->GetTexture(type, i, &path);
 
+        bool skip = false;
+        for (Texture &texture : LOADED_TEXTURES) {
+            if (std::strcmp(texture.path.data(), path.C_Str()) == 0) {
+                textures.push_back(texture);
+                skip = true;
+                break;
+            }
+        }
+
+        if (skip) {
+            continue;
+        }
+
         Texture texture;
         texture.id = texture_from_file(path.C_Str(), DIRECTORY);
         texture.type = typeName;
         texture.path = path.C_Str();
         textures.push_back(texture);
+        LOADED_TEXTURES.push_back(texture);
     }
     return textures;
 }

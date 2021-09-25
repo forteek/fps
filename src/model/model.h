@@ -5,14 +5,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <string>
-#include <glad/glad.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "../shader/shader.h"
 #include "mesh.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
 
 using std::vector;
 using std::string;
@@ -20,8 +17,9 @@ using std::string;
 class Model
 {
     private:
-        vector<Mesh> MESHES;
-        string DIRECTORY;
+        vector<Mesh>    MESHES;
+        vector<Texture> LOADED_TEXTURES;
+        string          DIRECTORY;
 
         void load_model(const string& path);
         void process_node(aiNode *node, const aiScene *scene);

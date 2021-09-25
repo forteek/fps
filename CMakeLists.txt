@@ -20,11 +20,12 @@ file(GLOB SOURCES
 
 add_subdirectory(lib/glfw)
 include_directories(lib/glfw/include)
-add_subdirectory(lib/assimp)
-include_directories(lib/assimp/include)
+add_subdirectory(lib/assimp-3.1.1)
+include_directories(lib/assimp-3.1.1/include)
 
 add_executable(fps ${SOURCES})
 target_link_libraries(fps
         glfw
+        assimp
         ${GLFW_LIBRARIES}
 )

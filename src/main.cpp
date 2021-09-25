@@ -6,8 +6,6 @@
 #include <glm/glm.hpp>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
 
 #include "shader/shader.h"
 #include "camera/camera.h"
