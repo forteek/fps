@@ -152,7 +152,7 @@ int main() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    Model model("../models/backpack/backpack.obj");
+    Model model("../models/fish/ryba.obj");
     vector<Light*> lights = generate_lights();
 
     while(!glfwWindowShouldClose(window)) {
@@ -228,7 +228,7 @@ void draw_scene(
     }
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::rotate(modelMatrix, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
+//    modelMatrix = glm::rotate(modelMatrix, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
     modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
     modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
     shader.setUniformMatrix("model", modelMatrix);
@@ -273,21 +273,21 @@ void remove_vector_value(int value, vector<int> &vec)
 vector<Light*> generate_lights() {
     std::vector<Light*> lights;
 
-//    lights.push_back(new DirectionalLight(
-//            glm::vec3(-0.2f, -1.0f, -0.3f),
-//            glm::vec3(0.05f, 0.05f, 0.05f),
-//            glm::vec3(0.4f, 0.4f, 0.4f),
-//            glm::vec3(0.5f, 0.5f, 0.5f)
-//    ));
-    lights.push_back(new PointLight(
-            glm::vec3(-3.2f, -1.0f, -2.0f),
-            1.0f,
-            0.09f,
-            0.032f,
-            glm::vec3(0.0f, 0.2f, 0.0f),
-            glm::vec3(0.0f, 0.5f, 0.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f)
+    lights.push_back(new DirectionalLight(
+            glm::vec3(-0.2f, -1.0f, -0.3f),
+            glm::vec3(0.2f, 0.2f, 0.2f),
+            glm::vec3(0.4f, 0.4f, 0.4f),
+            glm::vec3(0.5f, 0.5f, 0.5f)
     ));
+//    lights.push_back(new PointLight(
+//            glm::vec3(-3.2f, -1.0f, -2.0f),
+//            1.0f,
+//            0.09f,
+//            0.032f,
+//            glm::vec3(0.0f, 0.2f, 0.0f),
+//            glm::vec3(0.0f, 0.5f, 0.0f),
+//            glm::vec3(0.0f, 1.0f, 0.0f)
+//    ));
 
     return lights;
 }
