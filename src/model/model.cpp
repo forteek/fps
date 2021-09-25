@@ -1,6 +1,15 @@
 #include "model.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#include <map>
+
+using std::map;
+
+map<int, int> CHANNEL_COUNT_FORMATS {
+        {1, GL_RED},
+        {3, GL_RGB},
+        {4, GL_RGBA}
+};
 
 Model::Model(const char *path)
 {
@@ -126,6 +135,7 @@ vector<Texture> Model::load_material_textures(aiMaterial *material, aiTextureTyp
         texture.path = path.C_Str();
         textures.push_back(texture);
         LOADED_TEXTURES.push_back(texture);
+        fprintf(stdout, "Loaded %s with id %d\n", path.C_Str(), texture.id);
     }
     return textures;
 }
@@ -135,37 +145,33 @@ unsigned int Model::texture_from_file(const char *path, const string &directory)
     string filename = string(path);
     filename = directory + '/' + filename;
 
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-    if (!data) {
-        fprintf(stderr, "Failed to load texture.");
-        stbi_image_free(data);
-
-        return textureID;
-    }
-
-    GLenum format;
-    if (nrComponents == 1)
-        format = GL_RED;
-    else if (nrComponents == 3)
-        format = GL_RGB;
-    else if (nrComponents == 4)
-        format = GL_RGBA;
-
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    unsigned int texture;
+    glGenTextures(1, &texture);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    stbi_set_flip_vertically_on_load(true);
+
+    int textureWidth, textureHeight, channelCount;
+    unsigned char *data = stbi_load(filename.c_str(), &textureWidth, &textureHeight, &channelCount, 0);
+    if (!data) {
+        fprintf(stderr, "Failed to load texture.");
+        stbi_image_free(data);
+
+        return texture;
+    }
+
+    GLint format = CHANNEL_COUNT_FORMATS[channelCount];
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
     stbi_image_free(data);
 
-    return textureID;
+    return texture;
 }
 

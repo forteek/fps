@@ -1,5 +1,9 @@
 #include <utility>
+#include <iostream>
+#include <map>
 #include "mesh.h"
+
+using std::map;
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
@@ -37,24 +41,22 @@ void Mesh::setup_mesh()
 
 void Mesh::draw(Shader &shader) const
 {
-    int diffuseIndex = 1;
-    int specularIndex = 1;
-    int index = 0;
+    map<string, int> indices {
+        {"texture_diffuse", 1},
+        {"texture_specular", 1},
+        {"texture_normal", 1},
+        {"texture_height", 1},
+    };
 
     for (const Texture& texture : TEXTURES) {
-        glActiveTexture(GL_TEXTURE0 + index);
+        glActiveTexture(GL_TEXTURE0 + texture.id - 1);
 
-        string number;
+        string number = std::to_string(indices[texture.type]++);
+        shader.setUniformInt(texture.type + number, texture.id - 1);
 
-        if (TEXTURES[index].type == "texture_diffuse") {
-            number = std::to_string(diffuseIndex++);
-        } else if (TEXTURES[index].type == "texture_specular") {
-            number = std::to_string(specularIndex++);
-        }
-
-        shader.setUniformInt("material." + texture.type + number, index);
         glBindTexture(GL_TEXTURE_2D, texture.id);
     }
+
     glActiveTexture(GL_TEXTURE0);
 
     glBindVertexArray(VAO);
