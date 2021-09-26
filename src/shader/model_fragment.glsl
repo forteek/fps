@@ -24,7 +24,7 @@ uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform vec3 viewPos;
 uniform int lightsCount;
-uniform Light lights[2];
+uniform Light lights[4];
 
 vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir);
 vec3 calc_point_light(Light light, vec3 normal, vec3 viewDir, vec3 fragPos);
@@ -75,12 +75,12 @@ vec3 calc_point_light(Light light, vec3 normal, vec3 viewDir, vec3 fragPos)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 33.0f);
 
-    float distance    = length(light.position - fragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-
     vec3 ambient  = light.ambient  * vec3(texture(texture_diffuse1, TexCoords));
     vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, TexCoords));
     vec3 specular = light.specular * spec * vec3(texture(texture_specular1, TexCoords));
+
+    float distance    = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     ambient  *= attenuation;
     diffuse  *= attenuation;

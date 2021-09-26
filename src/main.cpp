@@ -26,9 +26,11 @@ void draw_scene(
     Shader lampShader,
     Shader wavyShader,
     Model fish,
+    Model fish2,
+    Model fish3,
     Model seaweed,
     Model sand,
-    unsigned int lampVAO,
+    Model cube,
     const vector<Light*>& lights
 );
 vector<Light *> generate_lights();
@@ -61,7 +63,6 @@ vector<int> pressed_keys {};
 
 struct Seaweed {
     glm::vec2 coords;
-    float waveStrength;
     float scale;
     float rotation;
 };
@@ -94,7 +95,7 @@ GLFWwindow* initialize_program() {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
-    glClearColor(0.75, 0.75, 1, 1);
+    glClearColor(0.136f, 0.535f, 0.769f, 1);
     glEnable(GL_DEPTH_TEST);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -112,70 +113,16 @@ int main() {
     Shader shader("../src/shader/model_vertex.glsl", "../src/shader/model_fragment.glsl");
     Shader lampShader("../src/shader/lamp_v.glsl", "../src/shader/lamp_f.glsl");
     Shader wavyShader("../src/shader/wavy_vertex.glsl", "../src/shader/model_fragment.glsl");
-
-    float cubeVertices[] = {
-            -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-            -0.5f, -0.5f,  0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-
-            -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-            -0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
-    };
-
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-
-    unsigned int lampVAO;
-    glGenVertexArrays(1, &lampVAO);
-    glBindVertexArray(lampVAO);
-
-    glVertexAttribPointer(lampShader.attribute("vertex"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    Shader depthShader("../src/shader/depth_vertex.glsl", "../src/shader/null.glsl");
 
     Model fish("../models/fish/ryba.obj");
+    Model fish2("../models/fish2/ryba.obj");
+    Model fish3("../models/fish3/ryba.obj");
     Model seaweed("../models/seaweed/glon.obj");
+    Model sand("../models/sand/sand.obj");
+    Model cube("../models/cube/cube.obj");
     vector<Light*> lights = generate_lights();
     generate_seaweed();
-    Model sand("../models/sand/sand.obj");
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -185,7 +132,7 @@ int main() {
         lastFrame = currentFrame;
 
         handle_keys();
-        draw_scene(shader, lampShader, wavyShader, fish, seaweed, sand, lampVAO, lights);
+        draw_scene(shader, lampShader, wavyShader, fish, fish2, fish3, seaweed, sand, cube, lights);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -200,9 +147,11 @@ void draw_scene(
     Shader lampShader,
     Shader wavyShader,
     Model fish,
+    Model fish2,
+    Model fish3,
     Model seaweed,
     Model sand,
-    unsigned int lampVAO,
+    Model cube,
     const vector<Light*>& lights
 ) {
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
@@ -260,8 +209,7 @@ void draw_scene(
 
                 lampShader.setUniformVec3("color", light->get_specular());
 
-                glBindVertexArray(lampVAO);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
+                cube.draw(lampShader);
 
                 shader.use();
         }
@@ -283,14 +231,37 @@ void draw_scene(
     fish.draw(shader);
 
     modelMatrix = glm::mat4(1.0f);
+
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(
+            cos(-n / 3) * 8,
+            1.8f,
+            sin(-n / 3) * 8
+    ));
+    modelMatrix = glm::rotate(modelMatrix, 3.14f + (n/3) + (sin(n * 2) * cos(n * 2) / 2), glm::vec3(0,1,0));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.12f, 0.12f, 0.2f));
+    shader.setUniformMatrix("model", modelMatrix);
+    fish2.draw(shader);
+
+    modelMatrix = glm::mat4(1.0f);
+
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(
+            3 + (cos(n / 4) * 6.5),
+            1.4f,
+            2 + (sin(n / 4) * 6.5)
+    ));
+    modelMatrix = glm::rotate(modelMatrix, (-n/4) + (sin(n * 2) * cos(n * 2) / 2), glm::vec3(0,1,0));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.6f, 0.2f, 0.2f));
+    shader.setUniformMatrix("model", modelMatrix);
+    fish3.draw(shader);
+
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f));
     modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0f, 1.0f, 10.0f));
     shader.setUniformMatrix("model", modelMatrix);
     sand.draw(shader);
 
     wavyShader.use();
-    for (int seaweedIndex = 0; seaweedIndex <= 100; seaweedIndex++) {
-        Seaweed instance = seaweed_data[seaweedIndex];
+    for (Seaweed instance : seaweed_data) {
         modelMatrix = glm::mat4(1.0f);
 
         modelMatrix = glm::translate(modelMatrix,glm::vec3(
@@ -350,12 +321,30 @@ vector<Light*> generate_lights() {
 
     lights.push_back(new DirectionalLight(
             glm::vec3(-0.2f, -1.0f, -0.3f),
-            glm::vec3(0.05f, 0.05f, 0.05f),
-            glm::vec3(0.4f, 0.4f, 0.4f),
-            glm::vec3(0.5f, 0.5f, 0.5f)
+            glm::vec3(0.05f),
+            glm::vec3(0.4f),
+            glm::vec3(0.5f)
     ));
     lights.push_back(new PointLight(
-            glm::vec3(-0.2f, 2.0f, -0.3f),
+            glm::vec3(0.0f, 2.0f, 0.0f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.05f, 0.05f, 0.05f),
+            glm::vec3(0.8f, 0.8f, 0.8f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
+    ));
+    lights.push_back(new PointLight(
+            glm::vec3(8.1f, 2.0f, 8.1f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.01f, 0.05f, 0.01f),
+            glm::vec3(0.2f, 0.8f, 0.2f),
+            glm::vec3(0.3f, 1.0f, 0.3f)
+    ));
+    lights.push_back(new PointLight(
+            glm::vec3(-8.1f, 0.4f, -8.1f),
             1.0f,
             0.09f,
             0.032f,
@@ -370,14 +359,12 @@ vector<Light*> generate_lights() {
 void generate_seaweed() {
     std::default_random_engine generator(10);
     std::uniform_real_distribution<float> coordsDistribution(-10,10);
-    std::uniform_real_distribution<float> waveStrengthDistribution(0.3,1);
     std::uniform_real_distribution<float> scaleDistribution(0.3,0.7);
     std::uniform_real_distribution<float> rotationDistribution(-0.2,0.2);
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 200; i++) {
         Seaweed seaweed{};
         seaweed.coords = glm::vec2(coordsDistribution(generator), coordsDistribution(generator));
-        seaweed.waveStrength = waveStrengthDistribution(generator);
         seaweed.scale = scaleDistribution(generator);
         seaweed.rotation = rotationDistribution(generator) * 90;
 
