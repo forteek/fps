@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
+#include <random>
 
 #include "shader/shader.h"
 #include "camera/camera.h"
@@ -20,8 +21,9 @@ using std::map;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod);
 void mouse_callback(GLFWwindow* window, double x, double y);
-void draw_scene(Shader shader, Model model, Shader lampShader, unsigned int lampVAO, const vector<Light*>& lights);
+void draw_scene(Shader shader, Model fish, Model seaweed, Shader lampShader, unsigned int lampVAO, const vector<Light*>& lights, Shader wavyShader);
 vector<Light *> generate_lights();
+void generate_seaweed();
 void remove_vector_value(int value, vector<int> &vec);
 void handle_keys();
 
@@ -29,7 +31,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 Camera camera(
-    glm::vec3(0.0f, 0.0f, 3.0f),
+    glm::vec3(0.0f, 1.0f, 3.0f),
     glm::vec3(0.0f, 0.0f, -1.0f),
     glm::vec3(0.0f, 1.0f, 0.0f)
 );
@@ -48,13 +50,20 @@ map<int, int> key_mappings {
 };
 vector<int> pressed_keys {};
 
+struct Seaweed {
+    glm::vec2 coords;
+    float waveStrength;
+    float scale;
+    float rotation;
+};
+vector<Seaweed> seaweed_data {};
+
 GLFWwindow* initialize_program() {
     glfwInit();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
 
     #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -93,6 +102,7 @@ int main() {
 
     Shader shader("../src/shader/model_vertex.glsl", "../src/shader/model_fragment.glsl");
     Shader lampShader("../src/shader/lamp_v.glsl", "../src/shader/lamp_f.glsl");
+    Shader wavyShader("../src/shader/wavy_vertex.glsl", "../src/shader/model_fragment.glsl");
 
     float cubeVertices[] = {
             -0.5f, -0.5f, -0.5f,
@@ -152,18 +162,20 @@ int main() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    Model model("../models/fish/ryba.obj");
+    Model fish("../models/fish/ryba.obj");
+    Model seaweed("../models/seaweed/glon.obj");
     vector<Light*> lights = generate_lights();
+    generate_seaweed();
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float currentFrame = glfwGetTime();
+        float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         handle_keys();
-        draw_scene(shader, model, lampShader, lampVAO, lights);
+        draw_scene(shader, fish, seaweed, lampShader, lampVAO, lights, wavyShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -175,10 +187,13 @@ int main() {
 
 void draw_scene(
     Shader shader,
-    Model model,
+    Model fish,
+    Model seaweed,
+    Model sand,
     Shader lampShader,
     unsigned int lampVAO,
-    const vector<Light*>& lights
+    const vector<Light*>& lights,
+    Shader wavyShader
 ) {
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.get_view_matrix();
@@ -228,11 +243,39 @@ void draw_scene(
     }
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
-//    modelMatrix = glm::rotate(modelMatrix, (float)glfwGetTime(), glm::vec3(0.5f, 1, 0));
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+    auto n = (float)glfwGetTime();
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(
+            cos(n / 2) * 5,
+            1.0f,
+            sin(n / 2) * 5
+    ));
+    modelMatrix = glm::rotate(modelMatrix, (-n/2) + (sin(n * 2) * cos(n * 2) / 2), glm::vec3(0,1,0));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
     shader.setUniformMatrix("model", modelMatrix);
-    model.draw(shader);
+    fish.draw(shader);
+
+    wavyShader.use();
+
+    for (int seaweedIndex = 0; seaweedIndex <= 100; seaweedIndex++) {
+        Seaweed instance = seaweed_data[seaweedIndex];
+        modelMatrix = glm::mat4(1.0f);
+
+        modelMatrix = glm::translate(modelMatrix,glm::vec3(
+                instance.coords.x,
+                0.0f,
+                instance.coords.y
+        ));
+        modelMatrix = glm::rotate(modelMatrix, instance.rotation, glm::vec3(0,1,0));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(instance.scale));
+
+        wavyShader.setUniformMatrix("projection", projection);
+        wavyShader.setUniformMatrix("view", view);
+        wavyShader.setUniformMatrix("model", modelMatrix);
+        wavyShader.setUniformFloat("currentTime", n);
+
+        seaweed.draw(wavyShader);
+    }
 }
 
 void handle_keys()
@@ -275,19 +318,37 @@ vector<Light*> generate_lights() {
 
     lights.push_back(new DirectionalLight(
             glm::vec3(-0.2f, -1.0f, -0.3f),
-            glm::vec3(0.2f, 0.2f, 0.2f),
-            glm::vec3(0.4f, 0.4f, 0.4f),
-            glm::vec3(0.5f, 0.5f, 0.5f)
+            glm::vec3(0.3f, 0.3f, 0.3f),
+            glm::vec3(0.6f, 0.6f, 0.6f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
     ));
-//    lights.push_back(new PointLight(
-//            glm::vec3(-3.2f, -1.0f, -2.0f),
-//            1.0f,
-//            0.09f,
-//            0.032f,
-//            glm::vec3(0.0f, 0.2f, 0.0f),
-//            glm::vec3(0.0f, 0.5f, 0.0f),
-//            glm::vec3(0.0f, 1.0f, 0.0f)
-//    ));
+    lights.push_back(new PointLight(
+            glm::vec3(-3.2f, 2.0f, -2.0f),
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.2f, 0.2f, 0.2f),
+            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
+    ));
 
     return lights;
+}
+
+void generate_seaweed() {
+    std::default_random_engine generator(10);
+    std::uniform_real_distribution<float> coordsDistribution(-10,10);
+    std::uniform_real_distribution<float> waveStrengthDistribution(0.3,1);
+    std::uniform_real_distribution<float> scaleDistribution(0.3,0.7);
+    std::uniform_real_distribution<float> rotationDistribution(-0.2,0.2);
+
+    for (int i = 0; i < 100; i++) {
+        Seaweed seaweed{};
+        seaweed.coords = glm::vec2(coordsDistribution(generator), coordsDistribution(generator));
+        seaweed.waveStrength = waveStrengthDistribution(generator);
+        seaweed.scale = scaleDistribution(generator);
+        seaweed.rotation = rotationDistribution(generator) * 90;
+
+        seaweed_data.push_back(seaweed);
+    }
 }

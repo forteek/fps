@@ -26,7 +26,7 @@ void Model::draw(Shader &shader)
 void Model::load_model(const string& path)
 {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate);
 
     if (!scene || !scene->mRootNode || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
         fprintf(stderr, "%s", importer.GetErrorString());

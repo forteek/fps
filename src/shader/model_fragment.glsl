@@ -24,7 +24,7 @@ uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform vec3 viewPos;
 uniform int lightsCount;
-uniform Light lights[1];
+uniform Light lights[2];
 
 vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir);
 vec3 calc_point_light(Light light, vec3 normal, vec3 viewDir, vec3 fragPos);
@@ -47,7 +47,7 @@ void main()
         }
     }
 
-    FragColor = vec4(result, 1.0);
+    FragColor = texture(texture_diffuse1, TexCoords);
 }
 
 vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir)
