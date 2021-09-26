@@ -42,12 +42,12 @@ void main()
             result += calc_directional_light(lights[i], normalized, viewDir);
             break;
             case 1:
-            result += calc_point_light(lights[i], normalized, FragPos, viewDir);
+            result += calc_point_light(lights[i], normalized, viewDir, FragPos);
             break;
         }
     }
 
-    FragColor = texture(texture_diffuse1, TexCoords);
+    FragColor = vec4(result, 1.0);
 }
 
 vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir)
@@ -57,7 +57,7 @@ vec3 calc_directional_light(Light light, vec3 normal, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
 
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 33.0f);
 
     vec3 ambient  = light.ambient  * vec3(texture(texture_diffuse1, TexCoords));
     vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, TexCoords));
@@ -73,7 +73,7 @@ vec3 calc_point_light(Light light, vec3 normal, vec3 viewDir, vec3 fragPos)
     float diff = max(dot(normal, lightDir), 0.0);
 
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 33.0f);
 
     float distance    = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));

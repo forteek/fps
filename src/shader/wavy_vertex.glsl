@@ -14,11 +14,16 @@ uniform mat4 projection;
 
 void main()
 {
-    vec3 wavy_pos = vec3(
-        aPos.x + (sin(currentTime + aPos.y)) / 10,
+    vec3 wavy_pos;
+    if (aPos.y > 2) {
+        wavy_pos = vec3(
+        aPos.x + (sin(currentTime + aPos.y - 2)) / 10,
         aPos.y,
         aPos.z
-    );
+        );
+    } else {
+        wavy_pos = aPos;
+    }
     FragPos = vec3(model * vec4(wavy_pos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal;
     TexCoords = aTexCoords;

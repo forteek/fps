@@ -21,7 +21,16 @@ using std::map;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod);
 void mouse_callback(GLFWwindow* window, double x, double y);
-void draw_scene(Shader shader, Model fish, Model seaweed, Shader lampShader, unsigned int lampVAO, const vector<Light*>& lights, Shader wavyShader);
+void draw_scene(
+    Shader shader,
+    Shader lampShader,
+    Shader wavyShader,
+    Model fish,
+    Model seaweed,
+    Model sand,
+    unsigned int lampVAO,
+    const vector<Light*>& lights
+);
 vector<Light *> generate_lights();
 void generate_seaweed();
 void remove_vector_value(int value, vector<int> &vec);
@@ -166,6 +175,7 @@ int main() {
     Model seaweed("../models/seaweed/glon.obj");
     vector<Light*> lights = generate_lights();
     generate_seaweed();
+    Model sand("../models/sand/sand.obj");
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -175,7 +185,7 @@ int main() {
         lastFrame = currentFrame;
 
         handle_keys();
-        draw_scene(shader, fish, seaweed, lampShader, lampVAO, lights, wavyShader);
+        draw_scene(shader, lampShader, wavyShader, fish, seaweed, sand, lampVAO, lights);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -187,13 +197,13 @@ int main() {
 
 void draw_scene(
     Shader shader,
+    Shader lampShader,
+    Shader wavyShader,
     Model fish,
     Model seaweed,
     Model sand,
-    Shader lampShader,
     unsigned int lampVAO,
-    const vector<Light*>& lights,
-    Shader wavyShader
+    const vector<Light*>& lights
 ) {
     glm::mat4 projection = glm::perspective(glm::radians(camera.get_fov()), 800.0f/600.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.get_view_matrix();
@@ -206,20 +216,37 @@ void draw_scene(
 
     int i = 0;
     for (auto light : lights) {
+        shader.use();
         shader.setUniformInt("lights[" + std::to_string(i) + "].type", static_cast<int>(light->get_type()));
         shader.setUniformVec3("lights[" + std::to_string(i) + "].ambient", light->get_ambient());
         shader.setUniformVec3("lights[" + std::to_string(i) + "].diffuse", light->get_diffuse());
         shader.setUniformVec3("lights[" + std::to_string(i) + "].specular", light->get_specular());
 
+        wavyShader.use();
+        wavyShader.setUniformInt("lights[" + std::to_string(i) + "].type", static_cast<int>(light->get_type()));
+        wavyShader.setUniformVec3("lights[" + std::to_string(i) + "].ambient", light->get_ambient());
+        wavyShader.setUniformVec3("lights[" + std::to_string(i) + "].diffuse", light->get_diffuse());
+        wavyShader.setUniformVec3("lights[" + std::to_string(i) + "].specular", light->get_specular());
+
         switch (light->get_type()) {
             case LightType::DIRECTIONAL:
+                shader.use();
                 shader.setUniformVec3("lights[" + std::to_string(i) + "].direction", light->get_direction());
+                wavyShader.use();
+                wavyShader.setUniformVec3("lights[" + std::to_string(i) + "].direction", light->get_direction());
+                shader.use();
                 break;
             case LightType::POINT:
+                shader.use();
                 shader.setUniformVec3("lights[" + std::to_string(i) + "].position", light->get_position());
                 shader.setUniformFloat("lights[" + std::to_string(i) + "].constant", light->get_constant());
                 shader.setUniformFloat("lights[" + std::to_string(i) + "].linear", light->get_linear());
                 shader.setUniformFloat("lights[" + std::to_string(i) + "].quadratic", light->get_quadratic());
+                wavyShader.use();
+                wavyShader.setUniformVec3("lights[" + std::to_string(i) + "].position", light->get_position());
+                wavyShader.setUniformFloat("lights[" + std::to_string(i) + "].constant", light->get_constant());
+                wavyShader.setUniformFloat("lights[" + std::to_string(i) + "].linear", light->get_linear());
+                wavyShader.setUniformFloat("lights[" + std::to_string(i) + "].quadratic", light->get_quadratic());
 
                 lampShader.use();
 
@@ -255,8 +282,13 @@ void draw_scene(
     shader.setUniformMatrix("model", modelMatrix);
     fish.draw(shader);
 
-    wavyShader.use();
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0f, 1.0f, 10.0f));
+    shader.setUniformMatrix("model", modelMatrix);
+    sand.draw(shader);
 
+    wavyShader.use();
     for (int seaweedIndex = 0; seaweedIndex <= 100; seaweedIndex++) {
         Seaweed instance = seaweed_data[seaweedIndex];
         modelMatrix = glm::mat4(1.0f);
@@ -318,17 +350,17 @@ vector<Light*> generate_lights() {
 
     lights.push_back(new DirectionalLight(
             glm::vec3(-0.2f, -1.0f, -0.3f),
-            glm::vec3(0.3f, 0.3f, 0.3f),
-            glm::vec3(0.6f, 0.6f, 0.6f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
+            glm::vec3(0.05f, 0.05f, 0.05f),
+            glm::vec3(0.4f, 0.4f, 0.4f),
+            glm::vec3(0.5f, 0.5f, 0.5f)
     ));
     lights.push_back(new PointLight(
-            glm::vec3(-3.2f, 2.0f, -2.0f),
+            glm::vec3(-0.2f, 2.0f, -0.3f),
             1.0f,
             0.09f,
             0.032f,
-            glm::vec3(0.2f, 0.2f, 0.2f),
-            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(0.05f, 0.05f, 0.05f),
+            glm::vec3(0.8f, 0.8f, 0.8f),
             glm::vec3(1.0f, 1.0f, 1.0f)
     ));
 
